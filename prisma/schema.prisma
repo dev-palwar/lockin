@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model UserData {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  dp   String
+  arcs Arc[]
+}
+
+model Arc {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  dpOfArc    String
+  totalDays  Int
+  days       Day[]
+  UserData   UserData? @relation(fields: [userDataId], references: [id])
+  userDataId String?   @db.ObjectId
+}
+
+model Day {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  date        DateTime
+  name        String
+  dp          String?
+  tasks       Task[]
+  successRate Float
+  Arc         Arc?     @relation(fields: [arcId], references: [id])
+  arcId       String?  @db.ObjectId
+}
+
+model Task {
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  title  String
+  status Boolean
+  Day    Day?    @relation(fields: [dayId], references: [id])
+  dayId  String? @db.ObjectId
+}
