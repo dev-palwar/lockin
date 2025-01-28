@@ -1,12 +1,23 @@
 "use client";
-import GithubAuthButton from "@/components/Auth";
-import UserProfile from "@/components/UserProfile";
+import { useSession, signIn, signOut } from "next-auth/react";
 
-export default function Home() {
+export default function Component() {
+  const { data: session } = useSession();
+
+  if (session) {
+    return (
+      <>
+        Signed in as {session.user.email} <br />
+        <button onClick={() => signOut()}>Sign out</button>
+      </>
+    );
+  }
   return (
-    <div>
-      <GithubAuthButton />
-      {/* <UserProfile /> */}
-    </div>
+    <>
+      Not signed in <br />
+      <button onClick={() => signIn("github").catch(console.error)}>
+        Sign in using GitHub
+      </button>
+    </>
   );
 }

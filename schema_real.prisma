@@ -4,15 +4,14 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = "mongodb://root:example@localhost:27017/mydb?authSource=admin"
+  url      = env("DATABASE_URL")
 }
 
 model UserData {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  name  String
-  email String @unique
-  dp    String
-  arcs  Arc[]
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  dp   String
+  arcs Arc[]
 }
 
 model Arc {
