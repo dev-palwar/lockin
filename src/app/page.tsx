@@ -1,23 +1,20 @@
 "use client";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
-export default function Component() {
-  const { data: session } = useSession();
+export default function Home() {
+  const router = useRouter();
+  const session = useSession();
 
-  if (session) {
-    return (
-      <>
-        Signed in as {session.user.email} <br />
-        <button onClick={() => signOut()}>Sign out</button>
-      </>
-    );
+  if (session.status == "unauthenticated") {
+    router.push("/login");
   }
+
   return (
-    <>
-      Not signed in <br />
-      <button onClick={() => signIn("github").catch(console.error)}>
-        Sign in using GitHub
-      </button>
-    </>
+    <div>
+      Yoooo, {session?.data?.user?.name}
+      <Button onClick={() => signOut()}>logout</Button>
+    </div>
   );
 }
