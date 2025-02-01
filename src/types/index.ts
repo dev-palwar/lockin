@@ -4,6 +4,7 @@ export interface SessionUser {
   name: string;
   email: string;
   image: string;
+  id: string;
 }
 
 export interface ITask {
