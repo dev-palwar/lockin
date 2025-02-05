@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { createArc } from "@/actions/actions";
+import {
+  createArc,
+  getAllArcsOfUsersFromDb,
+  getArcById,
+} from "@/actions/actions";
+import { Arc } from "@prisma/client";
 
-export interface Arc {
+export interface NewArc {
   name: string;
   totalDays: number;
 }
@@ -19,32 +24,63 @@ export default function ArcPage() {
   const session = useSession();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [newArc, setNewArc] = useState<Arc>({ name: "", totalDays: 0 });
+  const [newArc, setNewArc] = useState<NewArc>({ name: "", totalDays: 0 });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const [usersArcs, setUsersArcs] = useState<Arc[] | null>(null);
 
+  // Handles redirect
+  useEffect(() => {
+    if (session.status === "unauthenticated") {
+      router.push("/login");
+    }
+
+    if (session.status === "authenticated") {
+      getUsersArcs();
+    }
+  }, [session.status, router]);
+
+  // Loading state
+  if (session.status === "loading") {
+    return <div>Loading...</div>;
+  }
+
+  // Prevents rendering if not authenticated
   if (session.status !== "authenticated") {
-    router.push("/login");
+    return null;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const result = await createArc(
-      newArc.name,
-      newArc.totalDays,
-      session.data?.user.id as string
-    );
+    try {
+      const result = await createArc(
+        newArc.name,
+        newArc.totalDays,
+        session.data.user.id
+      );
 
-    if (result?.success) {
-      toast({ title: "LFGGG!" });
-    } else {
-      toast({ title: result.error });
+      if (result?.success) {
+        toast({ title: "LFGGG!" });
+        router.push(`/arc/${result.data.id}`);
+      } else {
+        toast({ title: result?.error || "Failed to create arc" });
+      }
+    } finally {
+      setLoading(false);
+      setIsOpen(false);
     }
+  };
 
-    setLoading(false);
-    setIsOpen(false);
+  const getUsersArcs = async () => {
+    try {
+      const response = await getAllArcsOfUsersFromDb(session.data.user.id);
+      if (response.success) setUsersArcs(response.data);
+      else toast({ title: "Failed to fetch arcs" });
+    } catch (error) {
+      toast({ title: "Unexpected error" });
+    }
   };
 
   return (
@@ -53,7 +89,20 @@ export default function ArcPage() {
         <Button onClick={() => setIsOpen(true)} className="w-[20rem] h-12">
           New Arc
         </Button>
-
+        {usersArcs
+          ? usersArcs?.map((arc) => {
+              return (
+                <Button
+                  key={arc.id}
+                  className="w-full"
+                  variant={"outline"}
+                  onClick={() => router.push(`/arc/${arc.id}`)}
+                >
+                  {arc.name}
+                </Button>
+              );
+            })
+          : "loading prev arcs..."}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogContent className="bg-[#121212] text-white">
             <DialogTitle className="sr-only">Create a new arc</DialogTitle>

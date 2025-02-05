@@ -1,5 +1,18 @@
 import { Document, Types } from "mongoose";
 
+export type Task = {
+  title: string;
+  status: boolean;
+};
+
+export type Day = {
+  date: string;
+  name: string;
+  image?: string;
+  tasks: Task[];
+  successRate: number;
+};
+
 export interface SessionUser {
   name: string;
   email: string;
