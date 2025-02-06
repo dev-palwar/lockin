@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Rubik_Glitch } from "next/font/google";
 import "./globals.css";
-import AuthProvider from "../Providers/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
+import AuthProvider from "@/Providers/AuthProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const rubikGlitch = Rubik_Glitch({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-rubik-glitch",
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -26,12 +22,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <AuthProvider>
-          {children} <Toaster />
-        </AuthProvider>
+      <body className={`${rubikGlitch.variable} antialiased`}>
+        <AuthProvider>{children}</AuthProvider>
+        <Toaster />
       </body>
     </html>
   );

@@ -11,22 +11,31 @@ export async function createArc(
   userId: string
 ) {
   try {
+    // Generate days array with sequential dates
+    const dayArr = Array.from({ length: totalDays }, (_, i) => ({
+      id: uuidv4(),
+      date: new Date(new Date().setDate(new Date().getDate() + i)), // Incrementing dates
+      name: `Day ${i + 1}`,
+      image: null,
+      tasks: [],
+      successRate: null,
+    }));
+
     const data = await prisma.arc.create({
       data: {
         name,
         totalDays,
-        userId: userId,
+        userId,
         dpOfArc: "",
-        days: [],
+        days: dayArr,
       } as Prisma.ArcUncheckedCreateInput,
     });
 
-    console.log("Arc created " + JSON.stringify(data, null, 2));
-
+    console.log("Arc created", JSON.stringify(data, null, 2));
     return { success: true, data };
   } catch (error) {
-    console.log("sorry dost there's an error somewhere" + error);
-    return { error: "sorry dost there's an error somewhere" };
+    console.error("Error creating Arc:", error);
+    return { error: "Sorry dost, there's an error somewhere." };
   }
 }
 
@@ -43,12 +52,11 @@ export async function getAllArcsOfUsersFromDb(
   }
 }
 
-export async function getArcById(arcId: string, userId: string) {
+export async function getArcById(arcId: string) {
   try {
     const data = await prisma.arc.findUnique({
       where: {
         id: arcId,
-        userId: userId,
       },
     });
 
@@ -78,7 +86,7 @@ export async function addTasksToDay({ data }: temp): Promise<{
   );
 
   try {
-    const arcData = await getArcById(data.arcId, data.userId);
+    const arcData = await getArcById(data.arcId);
 
     if (!arcData.data) {
       return {

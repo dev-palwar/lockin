@@ -14,7 +14,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br bg-[#1A1A1D]">
       <Button
         className="w-[13%]"
         variant="outline"

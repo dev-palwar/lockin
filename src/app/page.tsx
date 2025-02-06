@@ -84,9 +84,12 @@ export default function ArcPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="flex items-center justify-center min-h-screen bg-[#1A1A1D]">
       <div className="flex flex-col items-center space-y-4 p-4">
-        <Button onClick={() => setIsOpen(true)} className="w-[20rem] h-12">
+        <Button
+          onClick={() => setIsOpen(true)}
+          className="w-[20rem] h-12 bg-purple-500 text-xl font-semibold"
+        >
           New Arc
         </Button>
         {usersArcs

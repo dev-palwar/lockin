@@ -1,7 +1,11 @@
 "use client";
-import { SessionProvider } from "next-auth/react";
 
-const AuthProvider = ({ children }) => {
+import { SessionProvider } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
+const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
+
   return <SessionProvider>{children}</SessionProvider>;
 };
 
