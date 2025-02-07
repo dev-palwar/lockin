@@ -3,6 +3,7 @@ import { Rubik_Glitch } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import AuthProvider from "@/Providers/AuthProvider";
+import Navbar from "@/components/navbar";
 
 const rubikGlitch = Rubik_Glitch({
   subsets: ["latin"],
@@ -23,7 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${rubikGlitch.variable} antialiased`}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Navbar />
+          {children}
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

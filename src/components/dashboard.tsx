@@ -7,6 +7,7 @@ import { TasksList } from "./task-list";
 
 interface Props {
   data: Arc | null | undefined;
+  toTheParent: (yessar: boolean) => void;
 }
 
 export default function Dashboard(props: Props) {
@@ -55,7 +56,7 @@ export default function Dashboard(props: Props) {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <div>
-                <TasksList data={dayData} />
+                <TasksList data={dayData} toTheParent={props.toTheParent} />
               </div>
             </DialogHeader>
           </DialogContent>

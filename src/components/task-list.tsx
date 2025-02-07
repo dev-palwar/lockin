@@ -15,9 +15,10 @@ import { useParams } from "next/navigation";
 
 interface TasksListProps {
   data: Day;
+  toTheParent: (yessar: boolean) => void;
 }
 
-export const TasksList: React.FC<TasksListProps> = ({ data }) => {
+export const TasksList: React.FC<TasksListProps> = ({ data, toTheParent }) => {
   const params = useParams();
   const { toast } = useToast();
   const { data: session } = useSession();
@@ -46,6 +47,10 @@ export const TasksList: React.FC<TasksListProps> = ({ data }) => {
         userId: session?.user.id as string,
       },
     });
+
+    if (response.success) {
+      toTheParent(true);
+    }
 
     toast({ title: response.message });
   };

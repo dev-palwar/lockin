@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 const Page = () => {
   const params = useParams();
   const [data, setData] = useState<Arc | null>(null);
+  const [reqReRender, setReqReRender] = useState(false);
 
   const getArcData = async () => {
     const { data: arcData } = await getArcById(params.arcId as string);
@@ -19,13 +20,20 @@ const Page = () => {
     }
   };
 
+  const toTheChild = (yessar: boolean) => {
+    if (yessar) {
+      // cause react bacthes the updates
+      setReqReRender((prev) => !prev); // Toggle between true & false
+    }
+  };
+
   useEffect(() => {
     getArcData();
-  }, []);
+  }, [reqReRender]);
 
   return (
     <div className="">
-      <Dashboard data={data} />
+      <Dashboard data={data} toTheParent={toTheChild} />
     </div>
   );
 };

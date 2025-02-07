@@ -36,13 +36,15 @@ export default function ArcPage() {
     }
 
     if (session.status === "authenticated") {
+      console.log(session);
+
       getUsersArcs();
     }
   }, [session.status, router]);
 
   // Loading state
   if (session.status === "loading") {
-    return <div>Loading...</div>;
+    return <div className="p-4">Loading...</div>;
   }
 
   // Prevents rendering if not authenticated
@@ -76,6 +78,8 @@ export default function ArcPage() {
   const getUsersArcs = async () => {
     try {
       const response = await getAllArcsOfUsersFromDb(session.data.user.id);
+      console.log(response);
+
       if (response.success) setUsersArcs(response.data);
       else toast({ title: "Failed to fetch arcs" });
     } catch (error) {

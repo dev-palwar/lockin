@@ -3,15 +3,18 @@ import { Button } from "@/components/ui/button";
 import { LucideGithub } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
 
   const session = useSession();
 
-  if (session.status == "authenticated") {
-    router.push("/");
-  }
+  useEffect(() => {
+    if (session.status == "authenticated") {
+      router.push("/");
+    }
+  }, [session]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br bg-[#1A1A1D]">
