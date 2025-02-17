@@ -12,16 +12,17 @@ import React, {
 } from "react";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
+import { useArcStore } from "@/store/arc-store";
 
 interface TasksListProps {
   data: Day;
-  toTheParent: (yessar: boolean) => void;
 }
 
-export const TasksList: React.FC<TasksListProps> = ({ data, toTheParent }) => {
+export const TasksList: React.FC<TasksListProps> = ({ data }) => {
   const params = useParams();
   const { toast } = useToast();
   const { data: session } = useSession();
+  const { causeReRender } = useArcStore();
 
   const [inputValues, setInputValues] = useState<string[]>(
     data.tasks.length > 0 ? data.tasks.map((task) => task.title) : [""]
@@ -49,7 +50,7 @@ export const TasksList: React.FC<TasksListProps> = ({ data, toTheParent }) => {
     });
 
     if (response.success) {
-      toTheParent(true);
+      causeReRender();
     }
 
     toast({ title: response.message });

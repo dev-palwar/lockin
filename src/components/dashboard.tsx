@@ -4,10 +4,15 @@ import * as React from "react";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Arc, Day } from "@prisma/client";
 import { TasksList } from "./task-list";
+import { useArcStore } from "@/store/arc-store";
+import Image from "next/image";
+import winterguts from "../assets/winterguts.jpg";
+import { Input } from "./ui/input";
+import { uploadImage } from "@/actions/uploadImage";
+import { updateImageOfArc } from "@/actions/actions";
 
 interface Props {
   data: Arc | null | undefined;
-  toTheParent: (yessar: boolean) => void;
 }
 
 export default function Dashboard(props: Props) {
@@ -15,40 +20,112 @@ export default function Dashboard(props: Props) {
 
   const [open, setOpen] = React.useState(false);
   const [dayData, setDayData] = React.useState<Day | null>(null);
+  const { tasksAdded } = useArcStore();
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const [updatedArcData, setUpdatedArcData] = React.useState<Arc>();
 
   const handleItemClick = (day: Day) => {
     setDayData(day);
     setOpen(true);
   };
 
+  const changeHeadingHandler = (e: any) => {
+    console.log(e.target.value);
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.files?.length) {
+      setLoading(true);
+      const file = event.target.files[0];
+
+      const { url } = await uploadImage(file);
+
+      if (url) {
+        try {
+          const { data } = await updateImageOfArc({
+            imageUrl: url,
+            arcId: props.data?.id as string,
+          });
+          setUpdatedArcData(data);
+          setLoading(false);
+        } catch (error) {
+          console.log("Error: " + error);
+          setLoading(false);
+        }
+      }
+    }
+  };
+
+  React.useEffect(() => {
+    setOpen(false);
+  }, [tasksAdded]);
+
   return (
     <div className="h-full w-full bg-[#1A1A1D] p-8 min-h-screen flex justify-center">
       <div className="flex flex-col w-[80%] gap-4 p-4 h-fit items-center">
-        <div className="mb-6 text-start">
-          <h2 className="text-white/80 text-5xl capitalize">
-            {props.data.name}
-          </h2>
-        </div>
-
-        {/* Grid for buttons */}
-        <div
-          className="grid gap-4"
-          style={{
-            gridTemplateColumns: `repeat(${Math.min(
-              15,
-              props.data.days.length
-            )}, 1fr)`,
-          }}
-        >
-          {props.data.days.map((day, index) => (
-            <button
-              key={index}
-              className={`w-12 h-12 border border-white/20 rounded-sm hover:bg-white/10 transition-colors ${
-                day.tasks.length > 0 ? "bg-green-50" : ""
-              }`}
-              onClick={() => handleItemClick(day)}
-            />
-          ))}
+        {/* Da box */}
+        <div>
+          {/* image of arc */}
+          {loading ? (
+            "loading..."
+          ) : (
+            <div className="w-fit mb-8">
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                id="fileInput"
+                onChange={handleFileChange}
+              />
+              <Image
+                src={
+                  updatedArcData
+                    ? (updatedArcData.dpOfArc as string)
+                    : (props.data.dpOfArc as string)
+                }
+                height={100}
+                width={100}
+                alt="Selected"
+                className="rounded-[10%] border border-[#5F9EA0] cursor-pointer"
+                onClick={() => document.getElementById("fileInput")?.click()}
+              />
+            </div>
+          )}
+          <Input
+            type="text"
+            variant={"ghost"}
+            value={props.data.name}
+            className="text-white/80 text-5xl capitalize px-2 py-1 mb-12 pl-0"
+            style={{ fontSize: "3rem" }}
+            onChange={(e) => changeHeadingHandler(e)}
+          />
+          {/* Grid for buttons */}
+          <div
+            className="grid gap-4"
+            style={{
+              gridTemplateColumns: `repeat(${Math.min(
+                15,
+                props.data.days.length
+              )}, 1fr)`,
+            }}
+          >
+            {props.data.days.map((day, index) => (
+              <button
+                key={index}
+                className={`w-12 h-12 border border-white/20 rounded-sm hover:bg-white/10 transition-colors 
+                ${day.tasks.length > 0 ? "bg-green-50" : ""} 
+                ${
+                  new Date(day.date).toDateString() ===
+                  new Date().toDateString()
+                    ? "bg-purple-500 text-white"
+                    : ""
+                }`}
+                onClick={() => handleItemClick(day)}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Dialog */}
@@ -56,7 +133,7 @@ export default function Dashboard(props: Props) {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <div>
-                <TasksList data={dayData} toTheParent={props.toTheParent} />
+                <TasksList data={dayData} />
               </div>
             </DialogHeader>
           </DialogContent>

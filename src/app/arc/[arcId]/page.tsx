@@ -4,11 +4,12 @@ import Dashboard from "@/components/dashboard";
 import { getArcById } from "@/actions/actions";
 import { Arc } from "@prisma/client";
 import { useParams } from "next/navigation";
+import { useArcStore } from "@/store/arc-store";
 
 const Page = () => {
   const params = useParams();
   const [data, setData] = useState<Arc | null>(null);
-  const [reqReRender, setReqReRender] = useState(false);
+  const { tasksAdded } = useArcStore();
 
   const getArcData = async () => {
     const { data: arcData } = await getArcById(params.arcId as string);
@@ -20,20 +21,13 @@ const Page = () => {
     }
   };
 
-  const toTheChild = (yessar: boolean) => {
-    if (yessar) {
-      // cause react bacthes the updates
-      setReqReRender((prev) => !prev); // Toggle between true & false
-    }
-  };
-
   useEffect(() => {
     getArcData();
-  }, [reqReRender]);
+  }, [tasksAdded]);
 
   return (
     <div className="">
-      <Dashboard data={data} toTheParent={toTheChild} />
+      <Dashboard data={data} />
     </div>
   );
 };

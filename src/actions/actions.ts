@@ -62,8 +62,44 @@ export async function getArcById(arcId: string) {
 
     return { success: true, data };
   } catch (error) {
-    console.log("sorry dost there's an error somewhere" + error);
-    return { error: "sorry dost there's an error somewhere" };
+    return {
+      success: false,
+      error: "sorry dost there's an error somewhere" + error,
+    };
+  }
+}
+
+export async function updateImageOfArc({
+  imageUrl,
+  arcId,
+}: {
+  imageUrl: string;
+  arcId: string;
+}) {
+  try {
+    const arc = getArcById(arcId);
+
+    if (!arc) {
+      return { success: false, message: "Arc not found" };
+    }
+
+    const updatedArc = await prisma.arc.update({
+      where: {
+        id: arcId,
+      },
+      data: {
+        dpOfArc: imageUrl,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Image updated successfully",
+      data: updatedArc,
+    };
+  } catch (error) {
+    console.error("Error updating arc image:", error);
+    return { success: false, message: "Failed to update image" };
   }
 }
 
