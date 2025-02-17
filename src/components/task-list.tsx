@@ -13,6 +13,7 @@ import React, {
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useArcStore } from "@/store/arc-store";
+import { Checkbox } from "./ui/checkbox";
 
 interface TasksListProps {
   data: Day;
@@ -26,6 +27,10 @@ export const TasksList: React.FC<TasksListProps> = ({ data }) => {
 
   const [inputValues, setInputValues] = useState<string[]>(
     data.tasks.length > 0 ? data.tasks.map((task) => task.title) : [""]
+  );
+
+  const [taskStatus, setTaskStatus] = useState<boolean[]>(
+    data.tasks.length > 0 ? data.tasks.map((task) => task.status) : [false]
   );
 
   const inputRefs = useRef<HTMLInputElement[]>([]);
@@ -46,6 +51,7 @@ export const TasksList: React.FC<TasksListProps> = ({ data }) => {
         dayId: data.id,
         tasks: values,
         userId: session?.user.id as string,
+        taskStatus,
       },
     });
 
@@ -63,6 +69,7 @@ export const TasksList: React.FC<TasksListProps> = ({ data }) => {
     if (event.key === "Enter") {
       event.preventDefault();
       setInputValues((prev) => [...prev, ""]);
+      // setTaskStatus((prev) => [...prev, false]);
       setTimeout(() => inputRefs.current[index + 1]?.focus(), 0);
     }
 
@@ -73,6 +80,7 @@ export const TasksList: React.FC<TasksListProps> = ({ data }) => {
     ) {
       event.preventDefault();
       setInputValues((prev) => prev.slice(0, -1));
+      setTaskStatus((prev) => prev.slice(0, -1));
       setTimeout(() => inputRefs.current[index - 1]?.focus(), 0);
     }
   };
@@ -83,22 +91,39 @@ export const TasksList: React.FC<TasksListProps> = ({ data }) => {
     setInputValues(newValues);
   };
 
+  const handleCheckboxChange = (index: number) => {
+    const newStatus = [...taskStatus];
+    newStatus[index] = !newStatus[index];
+    setTaskStatus(newStatus);
+
+    // Log the updated status to the console
+    console.log(`Task ${index + 1} status: ${newStatus[index]}`);
+  };
+
   return (
     <div>
       <h1 className="mb-4 text-2xl font-bold pb-4">{data.name}</h1>
       <form className="flex flex-col gap-4" onSubmit={formHandler}>
         {inputValues.map((value, index) => (
-          <Input
-            key={index}
-            ref={(el) => {
-              if (el) inputRefs.current[index] = el;
-            }}
-            value={value}
-            variant="ghost"
-            placeholder="Enter task..."
-            onKeyDown={(e) => keyHandler(e, index)}
-            onChange={(e) => handleInputChange(index, e.target.value)}
-          />
+          <div className="flex justify-center items-center" key={index}>
+            <Checkbox
+              checked={taskStatus[index]}
+              onCheckedChange={() => handleCheckboxChange(index)}
+            />
+            <Input
+              ref={(el) => {
+                if (el) inputRefs.current[index] = el;
+              }}
+              value={value}
+              variant="ghost"
+              placeholder="Enter task..."
+              onKeyDown={(e) => keyHandler(e, index)}
+              onChange={(e) => handleInputChange(index, e.target.value)}
+              style={{
+                textDecoration: taskStatus[index] ? "line-through" : "none",
+              }}
+            />
+          </div>
         ))}
         <Button type="submit" className="w-full">
           Add

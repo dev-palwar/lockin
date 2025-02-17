@@ -103,12 +103,35 @@ export async function updateImageOfArc({
   }
 }
 
+export async function updateNameOfArc(data: {
+  updatedNameOfArc: string;
+  idOfArc: string;
+}) {
+  try {
+    const response = await getArcById(data.idOfArc);
+
+    const updatedArc = await prisma.arc.update({
+      where: { id: data.idOfArc },
+      data: { name: data.updatedNameOfArc },
+    });
+
+    return {
+      success: true,
+      message: "Name updated successfully",
+      data: updatedArc,
+    };
+  } catch (error) {
+    return { success: false, message: "Failed to update name", error: error };
+  }
+}
+
 interface temp {
   data: {
     arcId: string;
     userId: string;
     dayId: string;
     tasks: string[];
+    taskStatus: boolean[];
   };
 }
 
@@ -132,10 +155,12 @@ export async function addTasksToDay({ data }: temp): Promise<{
       };
     }
 
-    const taskObjects = data.tasks.map((task: string) => ({
+    const taskObjects = data.tasks.map((task: string, index: number) => ({
       title: task,
-      status: false,
+      status: data.taskStatus[index],
     }));
+
+    console.log(taskObjects);
 
     // check if the day exists
     const dayExists = arcData.data?.days.find((day) => day.id === data.dayId);

@@ -9,7 +9,8 @@ import Image from "next/image";
 import winterguts from "../assets/winterguts.jpg";
 import { Input } from "./ui/input";
 import { uploadImage } from "@/actions/uploadImage";
-import { updateImageOfArc } from "@/actions/actions";
+import { updateImageOfArc, updateNameOfArc } from "@/actions/actions";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   data: Arc | null | undefined;
@@ -18,19 +19,17 @@ interface Props {
 export default function Dashboard(props: Props) {
   if (!props.data?.id) return <div>Loading...</div>;
 
+  const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
   const [dayData, setDayData] = React.useState<Day | null>(null);
   const { tasksAdded } = useArcStore();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [updatedArcData, setUpdatedArcData] = React.useState<Arc>();
+  const [arcName, setArcName] = React.useState<string>(props.data.name); // State for arc name
 
   const handleItemClick = (day: Day) => {
     setDayData(day);
     setOpen(true);
-  };
-
-  const changeHeadingHandler = (e: any) => {
-    console.log(e.target.value);
   };
 
   const handleFileChange = async (
@@ -55,6 +54,31 @@ export default function Dashboard(props: Props) {
           setLoading(false);
         }
       }
+    }
+  };
+
+  // Function to handle arc name change
+  const handleArcNameChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newName = e.target.value;
+    setArcName(newName); // Update local state
+  };
+
+  // Function to save the updated arc name
+  const saveArcName = async () => {
+    try {
+      let response = await updateNameOfArc({
+        idOfArc: props.data?.id as string,
+        updatedNameOfArc: arcName,
+      });
+
+      if (response.success) {
+        toast({ title: "ho gaya update 👍" });
+      }
+      console.log(response);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -93,13 +117,20 @@ export default function Dashboard(props: Props) {
               />
             </div>
           )}
+          {/* Arc Name Input */}
           <Input
             type="text"
             variant={"ghost"}
-            value={props.data.name}
+            value={arcName}
             className="text-white/80 text-5xl capitalize px-2 py-1 mb-12 pl-0"
-            style={{ fontSize: "3rem" }}
-            onChange={(e) => changeHeadingHandler(e)}
+            style={{ fontSize: "2rem" }}
+            onChange={handleArcNameChange}
+            // onBlur={saveArcName} // Save on blur
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                saveArcName(); // Save on Enter key press
+              }
+            }}
           />
           {/* Grid for buttons */}
           <div
